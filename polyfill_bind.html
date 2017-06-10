@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>手动实现bind</title>
+</head>
+<body>
+  <h2>手动实现bind</h2>
+  <a href="https://juejin.im/post/59093b1fa0bb9f006517b906">原文地址</a>
+  <!--<script>
+    // bind就是把函数this绑到对象上的一个函数，this不发生变化
+    var foo = {
+      value: 1
+    }
+
+    function bar() {
+      console.log(this.value)
+    }
+
+    var bindFoo = bar.bind(foo)
+
+    bindFoo() //1
+
+  </script>-->
+
+  <!--<script>
+    Function.prototype.bind_polyfill = function(context) {
+      var self = this // bar函数
+      return function () {
+        self.apply(context)
+      }
+    }
+
+    var foo = {
+      value: 1
+    }
+
+    function bar() {
+      console.log(this.value)
+    }
+
+    var bindFoo = bar.bind_polyfill(foo)
+
+    bindFoo()
+  </script>-->
+  <script>
+    Function.prototype.bind_polyfill = function(context) {
+      var self = this;
+      console.log(arguments);
+      var args= Array.prototype.slice.call(arguments, 1);
+      console.log(args);
+      console.log(this.prototype)
+      // 如果已传一个参数，接下来的函数可以接着传
+      var bindFun = function() {
+        var bindArr = Array.prototype.slice.call(arguments);
+        self.apply(this instanceof self ? this : context , args.concat(bindArr));
+      }
+      bindFun.prototype = this.prototype;
+      return bindFun
+    }
+
+    var foo = {
+      value: 1
+    }
+
+    function bar(name, age, sex) {
+      console.log(this.value)
+      console.log(name, age, sex);
+    }
+
+    var bindFoo = bar.bind_polyfill(foo, 'xurenjie');
+
+    bindFoo(21, 'man');
+  </script>
+  <script>
+    // 一个绑定函数也能使用new操作符创建对象：这种行为就像把原函数当成构造器。
+    // 提供的 this 值被忽略，同时调用时的参数被提供给模拟函数。
+    // 把bindFoo做构造函数？？？
+  </script>
+</body>
+</html>
