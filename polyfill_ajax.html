@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>原生实现ajax</title>
+</head>
+
+<body>
+  <h2>原生实现ajax的封装</h2>
+  <script>
+    var ajax = {};
+    // 核心功能XMLHttpRequest
+    ajax.httpRequest = function () {
+      if (window.XMLHttpRequest) {
+        return new XMLHttpRequest();
+      } else {
+        var versions = [
+          'MSXML2.XmlHttp.6.0',
+          'MSXML2.XmlHttp.5.0',
+          'MSXML2.XmlHttp.4.0',
+          'MSXML2.XmlHttp.3.0',
+          'MSXML2.XmlHttp.2.0',
+          'MSXML2.XmlHttp'
+        ], xhr;
+        // 嗅探
+        for (version of versions) {
+          try {
+            xhr = new ActiveXObject(version)
+            // 嗅探成功则跳出循环
+            break
+          } catch (e) {
+
+          }
+        }
+        return xhr
+      }
+    }
+    /**
+    * 功能：发送请求函数
+    * @url：后端的地址，地址会吐出来要的数据 api地址 前后端分离点
+    * @callback ajax 执行后，返回后回调的函数，接下来执行页面的无刷新更新或其他业务逻辑
+    * @method get post ，后端需要知道
+    * @data 发送的请求参数？a=1&id=1212121
+    * @async boolean true 异步无阻塞 false 同步 UI卡顿
+   */
+
+    ajax.send = function (url, callback, method, data, async) {
+      if (async === undefined) {
+        async = true
+      }
+      // xhr对象
+      var httpRequest = ajax.httpRequest();
+      httpRequest.open(method, url, async);
+      httpRequest.onreadystatechange = function () {
+        if (httpRequest.readyState == 4) {
+          callback(httpRequest.responseText)
+        }
+      }
+      if (method == 'POST') {
+        httpRequest.setRequestHeader('Content-type',
+          'applicaiton/x-www-form-urlencoded')
+      }
+      httpRequest.send(data);
+    }
+    // {a:1,b:2}
+    // ?a=1&b=2
+    ajax.get = function (url, data, callback, async) {
+      var query = [];
+      for (var key in data) {
+        query.push(encodeURIComponent(key)
+          + '=' + encodeURIComponent(data[key]));
+      }
+      console.log(query)
+      //api?a=0|a=1
+      // console.log(url + (query.length ? '?' + query.join('&') : ''))
+      ajax.send(url + (query.length ? '?' + query.join('&') : ''),
+        callback, 'GET', null, async
+      );
+    }
+    ajax.post = (url, data, callback, async) => {
+      var query = [];
+      for (var key in data) {
+        query.push(encodeURIComponent(key) + '=' +
+          encodeURIComponent(data[key]));
+      }
+      ajax.send(url, callback, 'POST', query.join('&'), async);
+    }
+  </script>
+</body>
+
+</html>
